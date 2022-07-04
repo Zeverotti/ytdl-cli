@@ -5,20 +5,27 @@ const mergeStreams = require('./src/utils/mergeStreams');
 
 async function download(link, path, title) {
   try {
+    const videoInfo = await ytdl.getInfo(link);
+
     const audio = ytdl(link, { quality: 'highestaudio' });
     const video = ytdl(link, { quality: 'highestvideo' });
 
-    video.on('response', (info) => {
-      bar = new progress('Downloading [:bar] :percent :etas', {
-        complete: String.fromCharCode(0x2588),
-        total: parseInt(info.headers['content-length'], 10),
-      });
-    });
-    video.on('data', (data) => {
-      bar.tick(data.length);
+    let bar = new progress('Downloading [:bar] :percent :etas', {
+      complete: String.fromCharCode(0x2588),
+      total: parseInt(videoInfo.videoDetails.lengthSeconds) * 1000,
     });
 
-    mergeStreams(video, audio, `${path}/${title}.mp4`);
+    let total = 0;
+
+    mergeStreams(video, audio, `${path}/${title}.mp4`, (progress) => {
+      const currentProgress = parseInt(parseInt(progress.out_time_ms) / 1000);
+      if (isNaN(currentProgress)) return;
+
+      bar.tick(currentProgress - total);
+      total += currentProgress - total;
+
+      bar.lastProgress = currentProgress;
+    });
   } catch (err) {
     console.log(err);
   }

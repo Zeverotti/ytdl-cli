@@ -1,7 +1,8 @@
 const ffmpeg = require('ffmpeg-static');
 const cp = require('child_process');
+const parseFfmpegOutput = require('./parseFfmpegOutput');
 
-const mergeStreams = (video, audio, outputPath) => {
+const mergeStreams = (video, audio, outputPath, progress) => {
   const ffmpegProcess = cp.spawn(
     ffmpeg,
     [
@@ -20,8 +21,11 @@ const mergeStreams = (video, audio, outputPath) => {
       '-f',
       'mp4',
       '-loglevel',
-      'error',
+      'warning',
       outputPath,
+      '-progress',
+      'pipe:2',
+      '-y',
     ],
     {
       stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'],
@@ -35,6 +39,7 @@ const mergeStreams = (video, audio, outputPath) => {
 
   ffmpegProcess.stdio[2].on('data', (chunk) => {
     ffmpegLogs += chunk.toString();
+    progress(parseFfmpegOutput(chunk.toString()));
   });
 
   ffmpegProcess.on('exit', (exitCode) => {
