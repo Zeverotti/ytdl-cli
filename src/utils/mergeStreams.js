@@ -1,7 +1,7 @@
 const ffmpeg = require('ffmpeg-static');
 const cp = require('child_process');
 
-const mergeStreams = (video, audio) => {
+const mergeStreams = (video, audio, outputPath) => {
   const ffmpegProcess = cp.spawn(
     ffmpeg,
     [
@@ -16,18 +16,12 @@ const mergeStreams = (video, audio) => {
       '-c:v',
       'copy',
       '-c:a',
-      'libmp3lame',
-      '-crf',
-      '27',
-      '-preset',
-      'veryfast',
-      '-movflags',
-      'frag_keyframe+empty_moov',
+      'aac',
       '-f',
       'mp4',
       '-loglevel',
       'error',
-      '-',
+      outputPath,
     ],
     {
       stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'],
@@ -49,7 +43,7 @@ const mergeStreams = (video, audio) => {
     }
   });
 
-  return ffmpegProcess.stdio[1];
+  return ffmpegProcess;
 };
 
 module.exports = mergeStreams;

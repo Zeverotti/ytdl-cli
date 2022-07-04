@@ -1,5 +1,4 @@
 const { program } = require('commander');
-const fs = require('fs');
 const ytdl = require('ytdl-core');
 const progress = require('progress');
 const mergeStreams = require('./src/utils/mergeStreams');
@@ -19,8 +18,7 @@ async function download(link, path, title) {
       bar.tick(data.length);
     });
 
-    const stream = mergeStreams(video, audio);
-    stream.pipe(fs.createWriteStream(`${path}/${title}.mp4`));
+    mergeStreams(video, audio, `${path}/${title}.mp4`);
   } catch (err) {
     console.log(err);
   }
