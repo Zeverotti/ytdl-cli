@@ -1,9 +1,17 @@
-const ffmpeg = require('ffmpeg-static');
-const cp = require('child_process');
-const parseFfmpegOutput = require('./parseFfmpegOutput');
+import ffmpeg from 'ffmpeg-static';
+import cp from 'child_process';
+import parseFfmpegOutput from './parseFfmpegOutput';
+import { Readable } from 'stream';
+import { ffmpegProgressOutput } from './parseFfmpegOutput';
 
-const extractAudio = (input, outputPath, progress) => {
-  const ffmpegProcess = cp.spawn(
+type progressFunc = (progress: typeof ffmpegProgressOutput) => void;
+
+const extractAudio = (
+  input: Readable,
+  outputPath: string,
+  progress: progressFunc
+) => {
+  const ffmpegProcess: any = cp.spawn(
     ffmpeg,
     [
       '-i',
@@ -30,13 +38,13 @@ const extractAudio = (input, outputPath, progress) => {
 
   let ffmpegLogs = '';
 
-  ffmpegProcess.stdio[2].on('data', (chunk) => {
+  ffmpegProcess.stdio[2].on('data', (chunk: any) => {
     ffmpegLogs += chunk.toString();
     progress(parseFfmpegOutput(chunk.toString()));
   });
 
-  ffmpegProcess.on('exit', (exitCode) => {
-    if (exitCode === 1) {
+  ffmpegProcess.on('exit', (exitCode: string | null) => {
+    if (exitCode === '1') {
       console.error(ffmpegLogs);
     }
   });
@@ -44,4 +52,4 @@ const extractAudio = (input, outputPath, progress) => {
   return ffmpegProcess;
 };
 
-module.exports = extractAudio;
+export default extractAudio;

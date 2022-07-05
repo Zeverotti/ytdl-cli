@@ -1,9 +1,18 @@
-const ffmpeg = require('ffmpeg-static');
-const cp = require('child_process');
-const parseFfmpegOutput = require('./parseFfmpegOutput');
+import parseFfmpegOutput from './parseFfmpegOutput';
+import cp from 'child_process';
+import ffmpeg from 'ffmpeg-static';
+import { ffmpegProgressOutput } from './parseFfmpegOutput';
+import { Readable } from 'stream';
 
-const mergeStreams = (video, audio, outputPath, progress) => {
-  const ffmpegProcess = cp.spawn(
+type progressFunc = (progress: typeof ffmpegProgressOutput) => void;
+
+const mergeStreams = (
+  video: Readable,
+  audio: Readable,
+  outputPath: string,
+  progress: progressFunc
+) => {
+  const ffmpegProcess: any = cp.spawn(
     ffmpeg,
     [
       '-i',
@@ -37,12 +46,12 @@ const mergeStreams = (video, audio, outputPath, progress) => {
 
   let ffmpegLogs = '';
 
-  ffmpegProcess.stdio[2].on('data', (chunk) => {
+  ffmpegProcess.stdio[2].on('data', (chunk: any) => {
     ffmpegLogs += chunk.toString();
     progress(parseFfmpegOutput(chunk.toString()));
   });
 
-  ffmpegProcess.on('exit', (exitCode) => {
+  ffmpegProcess.on('exit', (exitCode: number | null) => {
     if (exitCode === 1) {
       console.error(ffmpegLogs);
     }
@@ -51,4 +60,4 @@ const mergeStreams = (video, audio, outputPath, progress) => {
   return ffmpegProcess;
 };
 
-module.exports = mergeStreams;
+export default mergeStreams;

@@ -1,14 +1,14 @@
-const ytdl = require('ytdl-core');
-const progress = require('progress');
-const mergeStreams = require('./utils/mergeStreams');
-const fs = require('fs');
-const extractAudio = require('./utils/extractAudio');
-const https = require('https');
+import ytdl from 'ytdl-core';
+import progress from 'progress';
+import mergeStreams from './utils/mergeStreams';
+import extractAudio from './utils/extractAudio';
 
 class Video {
-  constructor(url, thumbnailUrl, output, title) {
+  url: string;
+  output: string;
+  title: string;
+  constructor(url: string, output: string, title: string) {
     this.url = url;
-    this.thumbnailUrl = thumbnailUrl;
     this.output = output;
     this.title = title;
   }
@@ -32,15 +32,11 @@ class Video {
         audio,
         `${this.output}/${this.title}.mp4`,
         (progress) => {
-          const currentProgress = parseInt(
-            parseInt(progress.out_time_ms) / 1000
-          );
+          const currentProgress = parseInt(progress.out_time_ms) / 1000;
           if (isNaN(currentProgress)) return;
 
           bar.tick(currentProgress - total);
           total += currentProgress - total;
-
-          bar.lastProgress = currentProgress;
         }
       );
     } catch (err) {
@@ -65,30 +61,11 @@ class Video {
       let total = 0;
 
       extractAudio(audio, `${this.output}/${this.title}.mp3`, (progress) => {
-        const currentProgress = parseInt(parseInt(progress.out_time_ms) / 1000);
+        const currentProgress = parseInt(progress.out_time_ms) / 1000;
         if (isNaN(currentProgress)) return;
 
         bar.tick(currentProgress - total);
         total += currentProgress - total;
-
-        bar.lastProgress = currentProgress;
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async getThumbnail() {
-    try {
-      console.log(this.thumbnailUrl);
-      const file = fs.createWriteStream(`${this.output}/${this.title}.webp`);
-      const request = https.get(this.thumbnailUrl, function (response) {
-        response.pipe(file);
-
-        file.on('finish', () => {
-          file.close();
-          console.log('Download Completed');
-        });
       });
     } catch (err) {
       console.log(err);
@@ -96,4 +73,4 @@ class Video {
   }
 }
 
-module.exports = Video;
+export default Video;
