@@ -3,10 +3,12 @@ const progress = require('progress');
 const mergeStreams = require('./utils/mergeStreams');
 const fs = require('fs');
 const extractAudio = require('./utils/extractAudio');
+const https = require('https');
 
 class Video {
-  constructor(url, output, title) {
+  constructor(url, thumbnailUrl, output, title) {
     this.url = url;
+    this.thumbnailUrl = thumbnailUrl;
     this.output = output;
     this.title = title;
   }
@@ -70,6 +72,23 @@ class Video {
         total += currentProgress - total;
 
         bar.lastProgress = currentProgress;
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async getThumbnail() {
+    try {
+      console.log(this.thumbnailUrl);
+      const file = fs.createWriteStream(`${this.output}/${this.title}.webp`);
+      const request = https.get(this.thumbnailUrl, function (response) {
+        response.pipe(file);
+
+        file.on('finish', () => {
+          file.close();
+          console.log('Download Completed');
+        });
       });
     } catch (err) {
       console.log(err);
