@@ -10,9 +10,9 @@ async function videoInfo(query: any, format = 'mp4') {
     'Downloading: ' +
       title +
       '\nDestination folder: ' +
-      (output != undefined ? output : __dirname)
+      (output != undefined ? output : process.cwd())
   );
-  output = output || __dirname;
+  output = output || process.cwd();
   const video = new Video(query.link, output, title);
   format === 'mp4' ? video.getVideoMP4() : video.getAudioMP3();
 }
