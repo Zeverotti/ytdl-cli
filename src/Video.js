@@ -1,7 +1,8 @@
-const ytdl = require("ytdl-core");
-const progress = require("progress");
-const mergeStreams = require("./utils/mergeStreams");
-const fs = require("fs");
+const ytdl = require('ytdl-core');
+const progress = require('progress');
+const mergeStreams = require('./utils/mergeStreams');
+const fs = require('fs');
+const extractAudio = require('./utils/extractAudio');
 
 class Video {
   constructor(url, output, title) {
@@ -14,10 +15,10 @@ class Video {
     try {
       const videoInfo = await ytdl.getInfo(this.url);
 
-      const audio = ytdl(this.url, { quality: "highestaudio" });
-      const video = ytdl(this.url, { quality: "highestvideo" });
+      const audio = ytdl(this.url, { quality: 'highestaudio' });
+      const video = ytdl(this.url, { quality: 'highestvideo' });
 
-      let bar = new progress("Downloading [:bar] :percent :etas", {
+      let bar = new progress('Downloading [:bar] :percent :etas', {
         complete: String.fromCharCode(0x2588),
         total: parseInt(videoInfo.videoDetails.lengthSeconds) * 1000,
       });
@@ -45,25 +46,35 @@ class Video {
     }
   }
 
-  // async getAudioMP3() {
-  //   try {
-  //     const audioInfo = await ytdl.getInfo(this.url);
+  async getAudioMP3() {
+    try {
+      const audioInfo = await ytdl.getInfo(this.url);
 
-  //     console.log(this.output);
-  //     const audio = ytdl(this.url, {
-  //       quality: "highestaudio",
-  //     }).pipe(fs.createWriteStream(`${this.output}/${this.title}.mp3`));
+      console.log(this.output);
+      const audio = ytdl(this.url, {
+        quality: 'highestaudio',
+      });
 
-  //     let bar = new progress("Downloading [:bar] :percent :etas", {
-  //       complete: String.fromCharCode(0x2588),
-  //       total: parseInt(audioInfo.videoDetails.lengthSeconds) * 1000,
-  //     });
+      let bar = new progress('Downloading [:bar] :percent :etas', {
+        complete: String.fromCharCode(0x2588),
+        total: parseInt(audioInfo.videoDetails.lengthSeconds) * 1000,
+      });
 
-  //     let total = 0;
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
+      let total = 0;
+
+      extractAudio(audio, `${this.output}/${this.title}.mp3`, (progress) => {
+        const currentProgress = parseInt(parseInt(progress.out_time_ms) / 1000);
+        if (isNaN(currentProgress)) return;
+
+        bar.tick(currentProgress - total);
+        total += currentProgress - total;
+
+        bar.lastProgress = currentProgress;
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
 }
 
 module.exports = Video;
