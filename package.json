@@ -1,7 +1,8 @@
 {
   "name": "ytdl-cli",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "bin": {
     "ytdl": "build/index.js"
@@ -15,8 +16,11 @@
   },
   "devDependencies": {
     "@types/ffmpeg-static": "^3.0.1",
+    "@types/jest": "^28.1.4",
     "@types/node": "^18.0.1",
-    "@types/progress": "^2.0.5"
+    "@types/progress": "^2.0.5",
+    "jest": "^28.1.2",
+    "ts-jest": "^28.0.5"
   },
   "version": "0.0.1",
   "main": "index.js",
