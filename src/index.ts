@@ -23,10 +23,10 @@ async function videoInfo(query: any, format = 'mp4', thumbnailStatus = false) {
 }
 
 program
-  .option('-l, --link <char>')
-  .option('-o, --output <char>')
-  .option('--mp3')
-  .option('--thumbnail')
+  .option('-l, --link <char>', 'Video url')
+  .option('-o, --output <char>', 'Output folder')
+  .option('--mp3', 'Download as audio in mp3 format')
+  .option('--thumbnail', 'Download video thumbnail')
   .action((query) => {
     videoInfo(query, query.mp3 ? 'mp3' : 'mp4', query.thumbnail ? true : false);
   });
