@@ -2,15 +2,24 @@ import ytdl from 'ytdl-core';
 import progress from 'progress';
 import mergeStreams from './utils/mergeStreams';
 import extractAudio from './utils/extractAudio';
+import fs from 'fs';
+import https from 'https';
 
 class Video {
   url: string;
   output: string;
   title: string;
-  constructor(url: string, output: string, title: string) {
+  thumbnailUrl: string;
+  constructor(
+    url: string,
+    thumbnailUrl: string,
+    output: string,
+    title: string
+  ) {
     this.url = url;
     this.output = output;
     this.title = title;
+    this.thumbnailUrl = thumbnailUrl;
   }
 
   async getVideoMP4() {
@@ -66,6 +75,22 @@ class Video {
 
         bar.tick(currentProgress - total);
         total += currentProgress - total;
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async getThumbnail() {
+    try {
+      const file = fs.createWriteStream(`${this.output}/${this.title}.webp`);
+      https.get(this.thumbnailUrl, function (response) {
+        response.pipe(file);
+
+        file.on('finish', () => {
+          file.close();
+          console.log('Download Completed');
+        });
       });
     } catch (err) {
       console.log(err);
