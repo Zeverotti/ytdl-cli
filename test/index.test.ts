@@ -12,12 +12,15 @@ interface res {
   stderr: string;
 }
 
-function cli(args: string[], cwd: string): Promise<res> {
+function cli(args: string[], cwd: string, errorLogging = false): Promise<res> {
   return new Promise((resolve) => {
     exec(
       `node ${path.resolve('./build/index.js')} ${args.join(' ')}`,
       { cwd },
       (error, stdout, stderr) => {
+        if (errorLogging && error && error.code) {
+          console.log('Error', error, stdout, stderr);
+        }
         resolve({
           code: error && error.code ? error.code : 0,
           error,
@@ -35,20 +38,22 @@ beforeAll(() => {
 
 describe('Test cli', () => {
   test('Test mp4 download', async () => {
-    let result = await cli(['-l', VIDEO_URL, '-o', OUTPUT_FOLDER], '.');
+    let result = await cli(['-l', VIDEO_URL, '-o', OUTPUT_FOLDER], '.', true);
     expect(result.code).toBe(0);
   });
   test('Test mp3 download', async () => {
     let result = await cli(
       ['-l', VIDEO_URL, '--mp3', '-o', OUTPUT_FOLDER],
-      '.'
+      '.',
+      true
     );
     expect(result.code).toBe(0);
   });
   test('Test thumbnail download', async () => {
     let result = await cli(
       ['-l', VIDEO_URL, '--thumbnail', '-o', OUTPUT_FOLDER],
-      '.'
+      '.',
+      true
     );
     expect(result.code).toBe(0);
   });
