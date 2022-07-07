@@ -21,10 +21,10 @@ ytdl-cli uses two main components which make it's functionality possible:
 
 ## Installation
 
-Install [ytdl-cli](https://www.npmjs.com/package/ytdl-cli) as a global npm dependency.
+Install [ytdl-cli](https://www.npmjs.com/package/@zeverotti/ytdl-cli) as a global npm dependency.
 
 ```sh
-npm i -G ytdl-cli
+npm i -g @zeverotti/ytdl-cli
 ```
 
 #### Building from source
@@ -51,6 +51,12 @@ Run:
 
 ```sh
 node build -l youtubelink # check options for more information on usage
+```
+
+Install globally:
+
+```sh
+npm i -g .
 ```
 
 ## License
