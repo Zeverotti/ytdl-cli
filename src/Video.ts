@@ -4,6 +4,7 @@ import mergeStreams from './utils/mergeStreams';
 import extractAudio from './utils/extractAudio';
 import fs from 'fs';
 import https from 'https';
+import { numericToHms } from './utils/timeConversion';
 
 class Video {
   url: string;
@@ -21,8 +22,12 @@ class Video {
     this.title = title;
     this.thumbnailUrl = thumbnailUrl;
   }
-
-  async getVideoMP4() {
+  /**
+   *
+   * @param begin Beginning in milliseconds
+   * @param end Ending in milliseconds
+   */
+  async getVideoMP4(begin?: number, end?: number) {
     try {
       const videoInfo = await ytdl.getInfo(this.url);
 
@@ -31,7 +36,9 @@ class Video {
 
       let bar = new progress('Downloading [:bar] :percent :etas', {
         complete: String.fromCharCode(0x2588),
-        total: parseInt(videoInfo.videoDetails.lengthSeconds) * 1000,
+        total: end
+          ? end - (begin || 0)
+          : parseInt(videoInfo.videoDetails.lengthSeconds) * 1000,
       });
 
       let total = 0;
@@ -46,7 +53,9 @@ class Video {
 
           bar.tick(currentProgress - total);
           total += currentProgress - total;
-        }
+        },
+        begin ? numericToHms(begin / 1000) : undefined,
+        end ? numericToHms(end / 1000) : undefined
       );
     } catch (err) {
       console.log(err);

@@ -10,21 +10,31 @@ const mergeStreams = (
   video: Readable,
   audio: Readable,
   outputPath: string,
-  progress: progressFunc
+  progress: progressFunc,
+  begin?: string,
+  end?: string
 ) => {
   const ffmpegProcess: any = cp.spawn(
     ffmpeg,
     [
+      ...(begin ? ['-ss'] : []),
+      ...(begin ? [begin] : []),
+      ...(end ? ['-to'] : []),
+      ...(end ? [end] : []),
       '-i',
       `pipe:3`,
+      ...(begin ? ['-ss'] : []),
+      ...(begin ? [begin] : []),
+      ...(end ? ['-to'] : []),
+      ...(end ? [end] : []),
       '-i',
       `pipe:4`,
       '-map',
       '0:v',
       '-map',
       '1:a',
-      '-c:v',
-      'copy',
+      ...(begin || end ? [] : ['-c:v']),
+      ...(begin || end ? [] : ['copy']),
       '-c:a',
       'aac',
       '-f',
@@ -41,8 +51,22 @@ const mergeStreams = (
     }
   );
 
-  video.pipe(ffmpegProcess.stdio[3]);
-  audio.pipe(ffmpegProcess.stdio[4]);
+  const streamErrorHandler = (err: any) => {
+    // Stream was closed because ffmpeg achieved the target duration,
+    // will not raise any error because it's intended behavior.
+    // Not 100% secure since one of the pipes might close for another
+    // reason and will pass this check.
+    if (
+      true &&
+      (ffmpegProcess.stdio[3].closed || ffmpegProcess.stdio[4].closed)
+    )
+      return;
+
+    console.log('Error occured during encoding');
+  };
+
+  video.pipe(ffmpegProcess.stdio[3]).on('error', streamErrorHandler);
+  audio.pipe(ffmpegProcess.stdio[4]).on('error', streamErrorHandler);
 
   let ffmpegLogs = '';
 
