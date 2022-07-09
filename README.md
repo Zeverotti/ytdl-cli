@@ -9,6 +9,8 @@ ytdl-cli is a cli tool used for downloading videos from YouTube.
 -o, --output <char>  Output folder
 --mp3                Download as audio in mp3 format
 --thumbnail          Download video thumbnail
+--begin <char>       Video beginning in HH:MM:SS format
+--end <char>         Video ending in HH:MM:SS format
 -h, --help           display help for command
 ```
 
@@ -25,6 +27,14 @@ Install [ytdl-cli](https://www.npmjs.com/package/@zeverotti/ytdl-cli) as a globa
 
 ```sh
 npm i -g @zeverotti/ytdl-cli
+```
+
+## Usage
+
+ytdl-cli can be used by calling ytdl from your terminal:
+
+```sh
+ytdl -l https://youtu.be/d1VR2MMUVO0
 ```
 
 #### Building from source

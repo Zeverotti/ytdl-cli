@@ -38,8 +38,8 @@ program
   .option('-o, --output <char>', 'Output folder')
   .option('--mp3', 'Download as audio in mp3 format')
   .option('--thumbnail', 'Download video thumbnail')
-  .option('--begin <char>')
-  .option('--end <char>')
+  .option('--begin <char>', 'Video beginning in HH:MM:SS format')
+  .option('--end <char>', 'Video ending in HH:MM:SS format')
   .action((query) => {
     videoInfo(
       query,
