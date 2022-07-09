@@ -14,8 +14,8 @@ async function videoInfo(
 ) {
   let output = query.output;
   const info = await ytdl.getInfo(query.link);
-  const { title, thumbnails } = info.videoDetails;
-  const thumbnailUrl = thumbnails[thumbnails.length - 1].url;
+  info.videoDetails.videoId;
+  const { title } = info.videoDetails;
   console.log(
     'Downloading: ' +
       title +
@@ -23,7 +23,7 @@ async function videoInfo(
       (output != undefined ? output : process.cwd())
   );
   output = output || process.cwd();
-  const video = new Video(query.link, thumbnailUrl, output, title);
+  const video = new Video(query.link, info.videoDetails.videoId, output, title);
   if (thumbnailStatus) return video.getThumbnail();
   if (format === 'mp4')
     video.getVideoMP4(

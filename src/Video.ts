@@ -10,17 +10,12 @@ class Video {
   url: string;
   output: string;
   title: string;
-  thumbnailUrl: string;
-  constructor(
-    url: string,
-    thumbnailUrl: string,
-    output: string,
-    title: string
-  ) {
+  videoId: string;
+  constructor(url: string, videoId: string, output: string, title: string) {
     this.url = url;
     this.output = output;
     this.title = title;
-    this.thumbnailUrl = thumbnailUrl;
+    this.videoId = videoId;
   }
   /**
    *
@@ -92,15 +87,18 @@ class Video {
 
   async getThumbnail() {
     try {
-      const file = fs.createWriteStream(`${this.output}/${this.title}.webp`);
-      https.get(this.thumbnailUrl, function (response) {
-        response.pipe(file);
+      const file = fs.createWriteStream(`${this.output}/${this.title}.jpg`);
+      https.get(
+        `https://i.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
+        function (response) {
+          response.pipe(file);
 
-        file.on('finish', () => {
-          file.close();
-          console.log('Download Completed');
-        });
-      });
+          file.on('finish', () => {
+            file.close();
+            console.log('Download Completed');
+          });
+        }
+      );
     } catch (err) {
       console.log(err);
     }
