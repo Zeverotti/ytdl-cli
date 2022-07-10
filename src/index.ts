@@ -4,6 +4,8 @@ import { program } from 'commander';
 import ytdl from 'ytdl-core';
 import Video from './Video';
 import { hmsToNumeric } from './utils/timeConversion';
+import fs from 'fs';
+import readline from 'readline';
 
 async function videoInfo(
   query: any,
@@ -26,12 +28,32 @@ async function videoInfo(
   const video = new Video(query.link, info.videoDetails.videoId, output, title);
   if (thumbnailStatus) return video.getThumbnail();
   if (format === 'mp4')
-    video.getVideoMP4(
+    return video.getVideoMP4(
       begin ? hmsToNumeric(begin).milliseconds : undefined,
       end ? hmsToNumeric(end).milliseconds : undefined
     );
-  else if (format === 'mp3') video.getAudioMP3();
+  else if (format === 'mp3') return video.getAudioMP3();
 }
+
+const fileInput = async (query: any) => {
+  const filePath = query.link;
+
+  const rl = readline.createInterface({
+    input: fs.createReadStream(filePath),
+    crlfDelay: Infinity,
+  });
+
+  for await (const line of rl) {
+    query.link = line;
+    await videoInfo(
+      query,
+      query.mp3 ? 'mp3' : 'mp4',
+      query.thumbnail ? true : false,
+      query.begin,
+      query.end
+    );
+  }
+};
 
 program
   .option('-l, --link <char>', 'Video url')
@@ -41,6 +63,9 @@ program
   .option('--begin <char>', 'Video beginning in HH:MM:SS format')
   .option('--end <char>', 'Video ending in HH:MM:SS format')
   .action((query) => {
+    const isFile = fs.existsSync(query.link);
+    if (isFile) return fileInput(query);
+
     videoInfo(
       query,
       query.mp3 ? 'mp3' : 'mp4',
