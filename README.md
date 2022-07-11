@@ -69,6 +69,19 @@ Install globally:
 npm i -g .
 ```
 
+## File input
+
+You can pass a file instead of a YouTube link, the program will read it line by line and download the videos located on those lines.
+
+**videos.txt**
+
+```
+https://www.youtube.com/watch?v=d1VR2MMUVO0
+https://www.youtube.com/watch?v=aqz-KE-bpKQ
+```
+
+`ytdl -l videos.txt`, will download the videos contained in `videos.txt`.
+
 ## License
 
 MIT
