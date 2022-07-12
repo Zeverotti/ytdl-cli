@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-import { program } from 'commander';
+import { Command } from 'commander';
 import ytdl from 'ytdl-core';
 import Video from './Video';
 import { hmsToNumeric } from './utils/timeConversion';
@@ -44,37 +44,46 @@ const fileInput = async (query: any) => {
   });
 
   for await (const line of rl) {
-    query.link = line;
-    await videoInfo(
-      query,
-      query.mp3 ? 'mp3' : 'mp4',
-      query.thumbnail ? true : false,
-      query.begin,
-      query.end
-    );
+    let args = line.split(' ');
+    const link = args.shift();
+    args = [
+      'node',
+      'index.js',
+      ...(line.split(' ').length > 1 ? [] : process.argv.slice(2)),
+      '-l',
+      link || '',
+      ...args,
+    ];
+    try {
+      await getProgram().parseAsync(args);
+    } catch (err) {
+      console.log('Skipped', link, 'due to error');
+    }
   }
 };
 
-program
-  .option('-l, --link <char>', 'Video url')
-  .option('-o, --output <char>', 'Output folder')
-  .option('--mp3', 'Download as audio in mp3 format')
-  .option('--thumbnail', 'Download video thumbnail')
-  .option('--begin <char>', 'Video beginning in HH:MM:SS format')
-  .option('--end <char>', 'Video ending in HH:MM:SS format')
-  .action((query) => {
-    const isFile = fs.existsSync(query.link);
-    if (isFile) return fileInput(query);
+const getProgram = () => {
+  const command = new Command();
+  command
+    .option('-l, --link <char>', 'Video url')
+    .option('-o, --output <char>', 'Output folder')
+    .option('--mp3', 'Download as audio in mp3 format')
+    .option('--thumbnail', 'Download video thumbnail')
+    .option('--begin <char>', 'Video beginning in HH:MM:SS format')
+    .option('--end <char>', 'Video ending in HH:MM:SS format')
+    .action((query) => {
+      const isFile = fs.existsSync(query.link);
+      if (isFile) return fileInput(query);
 
-    videoInfo(
-      query,
-      query.mp3 ? 'mp3' : 'mp4',
-      query.thumbnail ? true : false,
-      query.begin,
-      query.end
-    );
-  });
+      return videoInfo(
+        query,
+        query.mp3 ? 'mp3' : 'mp4',
+        query.thumbnail ? true : false,
+        query.begin,
+        query.end
+      );
+    });
+  return command;
+};
 
-program.parse();
-
-const options = program.opts();
+getProgram().parse();
