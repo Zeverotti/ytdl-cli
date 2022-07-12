@@ -82,6 +82,13 @@ https://www.youtube.com/watch?v=aqz-KE-bpKQ
 
 `ytdl -l videos.txt`, will download the videos contained in `videos.txt`.
 
+You can pass parameters to each video as you normally would when using the cli.
+
+```
+https://www.youtube.com/watch?v=d1VR2MMUVO0 --mp3
+https://www.youtube.com/watch?v=aqz-KE-bpKQ --thumbnail
+```
+
 ## License
 
 MIT
