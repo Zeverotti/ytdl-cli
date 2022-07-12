@@ -6,6 +6,7 @@ import Video from './Video';
 import { hmsToNumeric } from './utils/timeConversion';
 import fs from 'fs';
 import readline from 'readline';
+import normalizeOutputPath from './utils/normalizeOutputPath';
 
 async function videoInfo(
   query: any,
@@ -14,17 +15,11 @@ async function videoInfo(
   begin?: string,
   end?: string
 ) {
-  let output = query.output;
+  let output = query.output || process.cwd();
   const info = await ytdl.getInfo(query.link);
-  info.videoDetails.videoId;
+  output = normalizeOutputPath(query, output, info);
   const { title } = info.videoDetails;
-  console.log(
-    'Downloading: ' +
-      title +
-      '\nDestination folder: ' +
-      (output != undefined ? output : process.cwd())
-  );
-  output = output || process.cwd();
+  console.log('Downloading:', title, '\nDestination folder:', output);
   const video = new Video(query.link, info.videoDetails.videoId, output, title);
   if (thumbnailStatus) return video.getThumbnail();
   if (format === 'mp4')

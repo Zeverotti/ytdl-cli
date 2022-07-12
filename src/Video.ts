@@ -42,7 +42,7 @@ class Video {
         const ffmpegProcess = mergeStreams(
           video,
           audio,
-          `${this.output}/${this.title}.mp4`,
+          `${this.output}`,
           (progress) => {
             const currentProgress = parseInt(progress.out_time_ms) / 1000;
             if (isNaN(currentProgress)) return;
@@ -82,7 +82,7 @@ class Video {
 
         const ffmpegProcess = extractAudio(
           audio,
-          `${this.output}/${this.title}.mp3`,
+          `${this.output}`,
           (progress) => {
             const currentProgress = parseInt(progress.out_time_ms) / 1000;
             if (isNaN(currentProgress)) return;
@@ -104,7 +104,7 @@ class Video {
   async getThumbnail(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const file = fs.createWriteStream(`${this.output}/${this.title}.jpg`);
+        const file = fs.createWriteStream(`${this.output}`);
         https.get(
           `https://i.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
           function (response) {
