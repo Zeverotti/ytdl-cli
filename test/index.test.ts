@@ -5,7 +5,10 @@ import pathToFfmpeg from 'ffmpeg-static';
 import { hmsToNumeric } from '../src/utils/timeConversion';
 import ytdl from 'ytdl-core';
 
-const VIDEO_URL = 'https://youtu.be/d1VR2MMUVO0';
+const VIDEO_URLS = [
+  'https://youtu.be/d1VR2MMUVO0',
+  'https://youtu.be/YXT9CQ16-i8',
+];
 const OUTPUT_FOLDER = './testfiles';
 const LENGTH_TOLERANCE = 5;
 
@@ -66,8 +69,12 @@ beforeAll(() => {
 
 describe('Test cli', () => {
   test('Test mp4 download', async () => {
-    let result = await cli(['-l', VIDEO_URL, '-o', OUTPUT_FOLDER], '.', true);
-    const { videoDetails } = await ytdl.getBasicInfo(VIDEO_URL);
+    let result = await cli(
+      ['-l', VIDEO_URLS[0], '-o', OUTPUT_FOLDER],
+      '.',
+      true
+    );
+    const { videoDetails } = await ytdl.getBasicInfo(VIDEO_URLS[0]);
     const duration = await getDuration(
       `${OUTPUT_FOLDER}/${videoDetails.title}.mp4`
     );
@@ -82,11 +89,11 @@ describe('Test cli', () => {
   });
   test('Test mp3 download', async () => {
     let result = await cli(
-      ['-l', VIDEO_URL, '--mp3', '-o', OUTPUT_FOLDER],
+      ['-l', VIDEO_URLS[0], '--mp3', '-o', OUTPUT_FOLDER],
       '.',
       true
     );
-    const { videoDetails } = await ytdl.getBasicInfo(VIDEO_URL);
+    const { videoDetails } = await ytdl.getBasicInfo(VIDEO_URLS[0]);
     const duration = await getDuration(
       `${OUTPUT_FOLDER}/${videoDetails.title}.mp3`
     );
@@ -101,11 +108,24 @@ describe('Test cli', () => {
   });
   test('Test thumbnail download', async () => {
     let result = await cli(
-      ['-l', VIDEO_URL, '--thumbnail', '-o', OUTPUT_FOLDER],
+      ['-l', VIDEO_URLS[0], '--thumbnail', '-o', OUTPUT_FOLDER],
       '.',
       true
     );
     expect(result.code).toBe(0);
+  });
+  test('Test input file', async () => {
+    const videosFile = path.join(OUTPUT_FOLDER, 'videos.txt');
+    const fileContent = VIDEO_URLS.map(
+      (e, i) => `${e} -o ${path.join(OUTPUT_FOLDER, `${i}.mp4`)}`
+    ).join('\n');
+    fs.writeFileSync(videosFile, fileContent);
+    const result = await cli(['-l', videosFile], '.', true);
+    expect(result.code).toBe(0);
+    const existsResult = VIDEO_URLS.map((e, i) =>
+      fs.existsSync(path.join(OUTPUT_FOLDER, `${i}.mp4`))
+    );
+    expect(existsResult.filter((e) => !e).length).toBe(0);
   });
 });
 
