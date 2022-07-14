@@ -7,6 +7,12 @@ import { hmsToNumeric } from './utils/timeConversion';
 import fs from 'fs';
 import readline from 'readline';
 import normalizeOutputPath from './utils/normalizeOutputPath';
+import OAuth2Client from './OAuth2Client';
+import Byteroo from 'byteroo';
+
+const storage = new Byteroo({
+  name: 'ytdl-cli',
+});
 
 async function videoInfo(
   query: any,
@@ -77,6 +83,18 @@ const getProgram = () => {
         query.begin,
         query.end
       );
+    });
+  command
+    .command('auth')
+    .command('set')
+    .option('-i <char>')
+    .action(async (query) => {
+      const credentials = JSON.parse(fs.readFileSync(query.i).toString());
+      const clientId = credentials.installed.client_id;
+      const clientSecret = credentials.installed.client_secret;
+      const googleApi = new OAuth2Client(storage);
+      const oauth2Client = await googleApi.authenticate(clientId, clientSecret);
+      console.log('Authenticated', oauth2Client._clientId);
     });
   return command;
 };
