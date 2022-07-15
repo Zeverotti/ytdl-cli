@@ -156,6 +156,26 @@ const getProgram = () => {
         );
         console.log('Saved items to:', query.file);
       }
+      // check if the user has passed additional options
+      if (!query.file || process.argv.includes('--')) {
+        for (const e of results) {
+          const subIndex = process.argv.findIndex((e) => e === '--');
+          const args = [
+            'node',
+            'index.js',
+            '-l',
+            `https://www.youtube.com/watch?v=${e.contentDetails?.videoId}`,
+            ...(process.argv.includes('--')
+              ? process.argv.slice(subIndex + 1)
+              : []),
+          ];
+          try {
+            await getProgram().parseAsync(args);
+          } catch (err) {
+            console.log('Skipped', e.contentDetails?.videoId, 'due to error');
+          }
+        }
+      }
     });
   return command;
 };
