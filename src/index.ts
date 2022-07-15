@@ -10,6 +10,8 @@ import normalizeOutputPath from './utils/normalizeOutputPath';
 import OAuth2Client from './OAuth2Client';
 import Byteroo from 'byteroo';
 import path from 'path';
+import { google, youtube_v3 } from 'googleapis';
+import progress from 'progress';
 
 const storage = new Byteroo({
   name: 'ytdl-cli',
@@ -103,6 +105,58 @@ const getProgram = () => {
     fs.rmSync(credentialsPath);
     console.log('Credentials deleted successfully');
   });
+
+  command
+    .command('playlist')
+    .option('-i <char>')
+    .option('-f, --file <char>', 'Export to file')
+    .action(async (query) => {
+      const service = google.youtube('v3');
+      const googleApi = new OAuth2Client(storage);
+      const oauth2Client = await googleApi.authenticate();
+
+      const playlists = await service.playlists.list({
+        id: query.i,
+        part: ['id', 'contentDetails'],
+        auth: oauth2Client,
+      });
+      if (!playlists.data.items) return;
+      const playlist = playlists.data.items[0];
+      if (!playlist) return;
+
+      let bar = new progress('Retrieving items [:bar] :percent :etas', {
+        complete: String.fromCharCode(0x2588),
+        total: playlist.contentDetails?.itemCount || 0,
+      });
+
+      let results: youtube_v3.Schema$PlaylistItem[] = [];
+      let nextPageToken: string | null | undefined = undefined;
+      do {
+        const params: youtube_v3.Params$Resource$Playlistitems$List = {
+          playlistId: query.i,
+          auth: oauth2Client,
+          part: ['id', 'contentDetails'],
+          maxResults: 50,
+        };
+        if (nextPageToken) params.pageToken = nextPageToken;
+        const res = await service.playlistItems.list(params);
+        nextPageToken = res.data.nextPageToken;
+        bar.tick(res.data.items!.length);
+        if (res.data.items) results = [...results, ...res.data.items];
+      } while (nextPageToken);
+      if (query.file) {
+        fs.writeFileSync(
+          query.file,
+          results
+            .map(
+              (e) =>
+                `https://www.youtube.com/watch?v=${e.contentDetails?.videoId}`
+            )
+            .join('\n')
+        );
+        console.log('Saved items to:', query.file);
+      }
+    });
   return command;
 };
 
