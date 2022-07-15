@@ -9,6 +9,7 @@ import readline from 'readline';
 import normalizeOutputPath from './utils/normalizeOutputPath';
 import OAuth2Client from './OAuth2Client';
 import Byteroo from 'byteroo';
+import path from 'path';
 
 const storage = new Byteroo({
   name: 'ytdl-cli',
@@ -84,8 +85,9 @@ const getProgram = () => {
         query.end
       );
     });
-  command
-    .command('auth')
+
+  const auth = command.command('auth');
+  auth
     .command('set')
     .option('-i <char>')
     .action(async (query) => {
@@ -96,6 +98,11 @@ const getProgram = () => {
       const oauth2Client = await googleApi.authenticate(clientId, clientSecret);
       console.log('Authenticated', oauth2Client._clientId);
     });
+  auth.command('wipe').action(() => {
+    const credentialsPath = path.join(storage.path, 'credentials');
+    fs.rmSync(credentialsPath);
+    console.log('Credentials deleted successfully');
+  });
   return command;
 };
 
