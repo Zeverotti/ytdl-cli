@@ -2,16 +2,23 @@
 
 ytdl-cli is a cli tool used for downloading videos from YouTube.
 
-## Options
+## Usage
 
 ```
--l, --link <char>    Video url
--o, --output <char>  Output folder
---mp3                Download as audio in mp3 format
---thumbnail          Download video thumbnail
---begin <char>       Video beginning in HH:MM:SS format
---end <char>         Video ending in HH:MM:SS format
--h, --help           display help for command
+ytdl [command] [options]
+
+Options:
+  -l, --link <char>    Video url
+  -o, --output <char>  Output folder
+  --mp3                Download as audio in mp3 format
+  --thumbnail          Download video thumbnail
+  --begin <char>       Video beginning in HH:MM:SS format
+  --end <char>         Video ending in HH:MM:SS format
+  -h, --help           display help for command
+
+Commands:
+  auth
+  playlist [options]
 ```
 
 ## Modules
@@ -101,12 +108,18 @@ Follow step 1 in ["Node.js Quickstart"](https://developers.google.com/youtube/v3
 
 Run the following command: `ytdl auth set -i client_secret.json` and follow the instructions.
 
+##### Deleting credentials
+
+You can delete the credentials stored locally on your device by using `ytdl auth wipe`.
+
 #### Supported commands
 
 ##### Retrieve all videos in a playlist
 
 `ytdl playlist -i playlist_url`, will download all videos in a playlist with default options.
+
 `ytdl playlist -i playlist_url -f videos.txt`, will save all videos in a playlist inside a text file.
+
 `ytdl playlist -i playlist_url -- -o videos --mp3`, you can pass options as you normally would when using the CLI.
 
 ## License
