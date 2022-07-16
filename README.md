@@ -89,6 +89,26 @@ https://www.youtube.com/watch?v=d1VR2MMUVO0 --mp3
 https://www.youtube.com/watch?v=aqz-KE-bpKQ --thumbnail
 ```
 
+## YouTube API
+
+Some features can't be directly provided by ytdl-core, for example extracting videos from a playlist or channel. Instead of opting for an unofficial solution like scraping, which in time will eventually break and require maintenance, ytdl-cli uses the official Google API for those features (API key required).
+
+##### Obtaining the API key
+
+Follow step 1 in ["Node.js Quickstart"](https://developers.google.com/youtube/v3/quickstart/nodejs#step_1_turn_on_the). Remember where `client_secret.json` is located.
+
+##### Setting up the API key
+
+Run the following command: `ytdl auth set -i client_secret.json` and follow the instructions.
+
+#### Supported commands
+
+##### Retrieve all videos in a playlist
+
+`ytdl playlist -i playlist_url`, will download all videos in a playlist with default options.
+`ytdl playlist -i playlist_url -f videos.txt`, will save all videos in a playlist inside a text file.
+`ytdl playlist -i playlist_url -- -o videos --mp3`, you can pass options as you normally would when using the CLI.
+
 ## License
 
 MIT
