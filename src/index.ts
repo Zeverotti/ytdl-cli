@@ -177,6 +177,41 @@ const getProgram = () => {
         }
       }
     });
+
+  command
+    .command('channel')
+    .option('-i <char>')
+    .option('-f, --file <char>', 'Export to file')
+    .action(async (query) => {
+      const service = google.youtube('v3');
+      const googleApi = new OAuth2Client(storage);
+      const oauth2Client = await googleApi.authenticate();
+
+      const res = await service.channels.list({
+        id: query.i,
+        auth: oauth2Client,
+        part: ['contentDetails'],
+      });
+
+      const playlistId =
+        res.data.items![0].contentDetails!.relatedPlaylists?.uploads;
+
+      if (!playlistId) return;
+
+      const argv = process.argv.slice();
+      // remove the i option
+      const ind = argv.indexOf('-i');
+      argv.splice(ind, 2);
+      // remove node, filename and 'channel' command
+      argv.splice(0, 3);
+
+      const args = ['node', 'index.js', 'playlist', '-i', playlistId, ...argv];
+      try {
+        await getProgram().parseAsync(args);
+      } catch (err) {
+        console.log('Skipped', playlistId, 'due to error');
+      }
+    });
   return command;
 };
 
